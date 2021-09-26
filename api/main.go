@@ -9,10 +9,8 @@ import (
 )
 
 func main() {
-	env, err := config.LoadEnv()
-	if err != nil {
-		log.Fatal(err)
-	}
+	env := config.LoadEnv()
+	
     app := fiber.New()
 	url := fmt.Sprintf(":%s", env.Port)
     log.Fatal(app.Listen(url))
