@@ -1,15 +1,19 @@
 package main
 
 import (
-    "log"
+	"fmt"
+	"log"
 
-    "github.com/gofiber/fiber/v2"
+	"github.com/gmvbr/todo-go/api/config"
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
+	env, err := config.LoadEnv()
+	if err != nil {
+		log.Fatal(err)
+	}
     app := fiber.New()
-    app.Get("/", func (c *fiber.Ctx) error {
-        return c.SendString("Hello, World!")
-    })
-    log.Fatal(app.Listen(":3000"))
+	url := fmt.Sprintf(":%s", env.Port)
+    log.Fatal(app.Listen(url))
 }
