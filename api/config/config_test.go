@@ -1,46 +1,36 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLoadEnv(t *testing.T) {
+func TestOptionalEnv(t *testing.T) {
 
 	err := os.Setenv("PORT", "8080")
 	assert.NoError(t, err)
+	assert.Equal(t, "8080", OptionalEnv("PORT", "8080"))
 
-	err = os.Setenv("SECRET", "test")
+	err = os.Setenv("PORT", "")
 	assert.NoError(t, err)
-
-	env, err := LoadEnv()
-	assert.NoError(t, err)
-	assert.Equal(t, env.Port, "8080")
-	assert.Equal(t, env.Secret, "test")
+	assert.Equal(t, "3000", OptionalEnv("PORT", "3000"))
 }
 
-func TestDefaultPort(t *testing.T) {
-	err := os.Setenv("PORT", "")
+func TestRequireEnv(t *testing.T) {
+
+	Fatalf = func(format string, v ...interface{}) {
+		assert.Equal(t, "missing env variable 'PORT'", fmt.Sprintf(format, v...))
+	}
+
+	err := os.Setenv("PORT", "8080")
+	assert.NoError(t, err)
+	assert.Equal(t, "8080", RequireEnv("PORT"))
+
+	err = os.Setenv("PORT", "")
 	assert.NoError(t, err)
 
-	err = os.Setenv("SECRET", "test")
-	assert.NoError(t, err)
-
-	env, err := LoadEnv()
-	assert.NoError(t, err)
-	assert.Equal(t, env.Port, "3000")
-}
-
-func TestInvalidSecret(t *testing.T) {
-	err := os.Setenv("PORT", "3000")
-	assert.NoError(t, err)
-
-	err = os.Setenv("SECRET", "")
-	assert.NoError(t, err)
-
-	env, err := LoadEnv()
-	assert.Nil(t, env)
-	assert.Error(t, err, INVALID_SECRET)
+	RequireEnv("PORT")
 }

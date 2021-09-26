@@ -1,34 +1,43 @@
 package config
 
 import (
-	"errors"
+	"log"
 	"os"
 )
 
 type Environment struct {
-	Port   string
-	Secret string
+	Port            string
+	Secret          string
+	MongoUrl        string
+	MongoDb         string
+	MongoCollection string
 }
 
-const INVALID_SECRET = "missing env variable 'secret'"
+var Fatalf func(format string, v ...interface{}) = log.Fatalf
 
-func LoadEnv() (*Environment, error) {
+func OptionalEnv(key string, def string) (string) {
+	env := os.Getenv(key)
+	if len(env) > 0 {
+		return env
+	} 
+	return def
+}
 
+func RequireEnv(key string) (string) {
+	env := os.Getenv(key)
+	if len(env) > 0 {
+		return env
+	} 
+	Fatalf("missing env variable '%s'", key)
+	return ""
+}
+
+func LoadEnv() (*Environment) {
 	env := new(Environment)
-	port := os.Getenv("PORT")
-	secret := os.Getenv("SECRET")
-
-	if len(port) > 0 {
-		env.Port = port
-	} else {
-		env.Port = "3000"
-	}
-
-	if len(secret) > 0 {
-		env.Secret = secret
-	} else {
-		return nil, errors.New(INVALID_SECRET)
-	}
-
-	return env, nil
+	env.Port = OptionalEnv("PORT", "3000")
+	env.Secret = RequireEnv("SECRET")
+	env.MongoUrl = RequireEnv("MONGO_URL")
+	env.MongoDb = RequireEnv("MONGO_DB")
+	env.MongoCollection = RequireEnv("MONGO_COLLECTION")
+	return env
 }
