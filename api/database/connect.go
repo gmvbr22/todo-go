@@ -13,7 +13,7 @@ import (
  * 
  * Tempo limite de 10 segundos
  */
-func ConnectDB(url string, dbName string, collection string) (*mongo.Database, error){
+func ConnectDB(url string, dbName string) (*mongo.Database, error){
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
